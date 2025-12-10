@@ -1,0 +1,5 @@
+token user :
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJlbWFpbCI6InVzZXJAdGVzdC5jb20iLCJpYXQiOjE3NjUzNzg4MzgsImV4cCI6MTc2NTM4MjQzOH0.IjhQwn4HwRnwYyhjhm1MyxJsQ9bVrLmJQ-mqjCstKQU",
+  "role": "user"
+}

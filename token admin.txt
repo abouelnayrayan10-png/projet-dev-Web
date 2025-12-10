@@ -1,0 +1,5 @@
+token admin:
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sZSI6ImFkbWluIiwiZW1haWwiOiJhZG1pbkB0ZXN0LmNvbSIsImlhdCI6MTc2NTM3ODk0MCwiZXhwIjoxNzY1MzgyNTQwfQ.YEpCCinKHHRWCNlMREP_VSfDYwdmVkWQFsqJhu544y4",
+  "role": "admin"
+}
