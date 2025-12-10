@@ -1,23 +1,13 @@
 const express = require("express");
-
 const router = express.Router();
-
 const materialController = require("../controllers/material.controller");
-
 const {
-
   authenticateToken,
-
   authorizeRole,
-
 } = require("../middlewares/auth.middleware");
- 
 // Tous les utilisateurs connectés peuvent voir la liste du matériel
-
 router.get(
-
   "/",
-
   authenticateToken,
 
   materialController.list
