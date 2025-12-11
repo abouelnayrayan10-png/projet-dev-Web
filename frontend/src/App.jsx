@@ -1,9 +1,5 @@
-import Reservations from "./pages/Reservations";
+import Materials from "./pages/Materials";
  
 export default function App() {
-  return (
-<div>
-<Reservations />
-</div>
-  );
+  return <Materials />;
 }
