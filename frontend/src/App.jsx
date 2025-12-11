@@ -1,53 +1,74 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login";
+import Home from "./pages/Home";
 import Materials from "./pages/Materials";
 import Reservations from "./pages/Reservations";
 
+import Layout from "./components/Layout";
 import { isAuthenticated, isAdmin } from "./api/api";
 
-// ---------------------------
-// Route protégée : utilisateur connecté
-// ---------------------------
+
+// ===============
+// ROUTES PRIVÉES
+// ===============
+
+// Accessible UNIQUEMENT si connecté
 function PrivateRoute({ children }) {
   return isAuthenticated() ? children : <Navigate to="/" />;
 }
 
-// ---------------------------
-// Route protégée : admin uniquement
-// (tu peux encore l'utiliser si besoin)
-// ---------------------------
+// Accessible uniquement si ADMIN
 function AdminRoute({ children }) {
-  return isAuthenticated() && isAdmin() ? children : <Navigate to="/materials" />;
+  return isAuthenticated() && isAdmin() ? children : <Navigate to="/home" />;
 }
 
-// ---------------------------
+
+
+// ==========================
 // APP PRINCIPALE
-// ---------------------------
+// ==========================
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* PAGE LOGIN */}
+        {/* --- PAGE LOGIN --- */}
         <Route path="/" element={<Login />} />
 
-        {/* PAGE MATÉRIEL — accessible à tous les utilisateurs connectés */}
+
+        {/* --- PAGES AVEC LAYOUT (sidebar + navbar) --- */}
+
         <Route
-          path="/materials"
+          path="/home"
           element={
             <PrivateRoute>
-              <Materials />
+              <Layout>
+                <Home />
+              </Layout>
             </PrivateRoute>
           }
         />
 
-        {/* PAGE RÉSERVATIONS — accessible à TOUS LES UTILISATEURS CONNECTÉS */}
+        <Route
+          path="/materials"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <Materials />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="/reservations"
           element={
             <PrivateRoute>
-              <Reservations />
+              <Layout>
+                <Reservations />
+              </Layout>
             </PrivateRoute>
           }
         />

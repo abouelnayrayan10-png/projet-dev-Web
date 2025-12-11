@@ -1,14 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const reservationController = require("../controllers/reservation.controller");
-const {
-  authenticateToken,
-} = require("../middlewares/auth.middleware");
- 
-// GET /api/reservations
-router.get("/", authenticateToken, reservationController.list);
- 
-// POST /api/reservations
-router.post("/", authenticateToken, reservationController.create);
- 
+const controller = require("../controllers/reservation.controller");
+const { authenticateToken } = require("../controllers/auth.controller");
+
+router.get("/", authenticateToken, controller.list);
+router.post("/", authenticateToken, controller.create);
+router.delete("/:id", authenticateToken, controller.remove);
+
 module.exports = router;

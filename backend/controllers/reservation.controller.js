@@ -1,70 +1,71 @@
-// FAUSSE BASE DE DONNÉES EN MÉMOIRE
- 
-let reservations = [
-  // exemple :
-  // { id: 1, userId: 1, materialId: 2, startDate: "2025-01-01", endDate: "2025-01-02" }
-];
- 
-let materials = [
-  { id: 1, name: "Caméra HD", categoryId: 2, available: false },
-  { id: 2, name: "Micro", categoryId: 1, available: true },
-  { id: 3, name: "PC portable", categoryId: 3, available: false },
-];
- 
-// GET /api/reservations
+const { reservations, materials } = require("../data/data");
+
+// Chevauchement de dates
+function isOverlapping(r, start, end) {
+  return r.startDate <= end && r.endDate >= start;
+}
+
 exports.list = (req, res) => {
-  // Admin → voit tout
   if (req.user.role === "admin") {
-    return res.status(200).json(reservations);
+    return res.json(reservations);
   }
- 
-  // User → voit seulement SES réservations
-  const userReservations = reservations.filter(
-    (r) => r.userId === req.user.id
-  );
- 
-  res.status(200).json(userReservations);
+
+  const myReservations = reservations.filter((r) => r.userId === req.user.id);
+  res.json(myReservations);
 };
- 
-// POST /api/reservations
+
 exports.create = (req, res) => {
   const { materialId, startDate, endDate } = req.body;
- 
+
   if (!materialId || !startDate || !endDate) {
     return res.status(400).json({
-      message: "materialId, startDate et endDate sont obligatoires",
+      message: "materialId, startDate et endDate obligatoires",
     });
   }
- 
-  const material = materials.find(
-    (m) => m.id === Number(materialId)
-  );
- 
+
+  const material = materials.find((m) => m.id === Number(materialId));
   if (!material) {
     return res.status(404).json({ message: "Matériel introuvable" });
   }
- 
-  if (!material.available) {
-    return res
-      .status(400)
-      .json({ message: "Matériel non disponible" });
+
+  // Vérifier chevauchement
+  const overlap = reservations.some(
+    (r) =>
+      r.materialId === Number(materialId) &&
+      isOverlapping(r, startDate, endDate)
+  );
+
+  if (overlap) {
+    return res.status(400).json({
+      message: "Ce matériel est déjà réservé sur cette période",
+    });
   }
- 
+
   const newReservation = {
-    id:
-      reservations.length > 0
-        ? reservations[reservations.length - 1].id + 1
-        : 1,
+    id: reservations.length ? reservations[reservations.length - 1].id + 1 : 1,
     userId: req.user.id,
     materialId: Number(materialId),
     startDate,
     endDate,
   };
- 
+
   reservations.push(newReservation);
- 
-  // Le matériel devient indisponible
+
+  // matériel devient indispo
   material.available = false;
- 
+
   res.status(201).json(newReservation);
+};
+
+exports.remove = (req, res) => {
+  const id = Number(req.params.id);
+
+  const idx = reservations.findIndex((r) => r.id === id);
+  if (idx === -1)
+    return res.status(404).json({ message: "Réservation introuvable" });
+
+  const deleted = reservations[idx];
+  reservations.splice(idx, 1);
+
+  res.json({ message: "Réservation supprimée", deleted });
 };
