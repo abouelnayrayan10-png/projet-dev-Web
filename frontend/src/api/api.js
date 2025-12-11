@@ -1,22 +1,7 @@
-const API_URL = "http://localhost:3000/api";
+// ---------- Fonctions pour le matériel ----------
  
-// récupère le token stocké par le front (plus tard via la page Login)
-function getAuthHeaders() {
-  const token = localStorage.getItem("token");
- 
-  if (!token) {
-    return {};
-  }
- 
-  return {
-    Authorization: `Bearer ${token}`,
-  };
-}
- 
-// ---------- Fonctions pour les réservations ----------
- 
-export async function fetchReservations() {
-  const response = await fetch(`${API_URL}/reservations`, {
+export async function fetchMaterials() {
+  const response = await fetch(`${API_URL}/materials`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -25,24 +10,57 @@ export async function fetchReservations() {
   });
  
   if (!response.ok) {
-    throw new Error("Erreur lors de la récupération des réservations");
+    throw new Error("Erreur lors de la récupération du matériel");
   }
  
   return response.json();
 }
  
-export async function createReservation(materialId, startDate, endDate) {
-  const response = await fetch(`${API_URL}/reservations`, {
+export async function createMaterial(name, categoryId, available) {
+  const response = await fetch(`${API_URL}/materials`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...getAuthHeaders(),
     },
-    body: JSON.stringify({ materialId, startDate, endDate }),
+    body: JSON.stringify({ name, categoryId, available }),
   });
  
   if (!response.ok) {
-    throw new Error("Erreur lors de la création de la réservation");
+    throw new Error("Erreur lors de la création du matériel");
+  }
+ 
+  return response.json();
+}
+ 
+export async function updateMaterial(id, name, categoryId, available) {
+  const response = await fetch(`${API_URL}/materials/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ name, categoryId, available }),
+  });
+ 
+  if (!response.ok) {
+    throw new Error("Erreur lors de la mise à jour du matériel");
+  }
+ 
+  return response.json();
+}
+ 
+export async function deleteMaterial(id) {
+  const response = await fetch(`${API_URL}/materials/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+  });
+ 
+  if (!response.ok) {
+    throw new Error("Erreur lors de la suppression du matériel");
   }
  
   return response.json();
