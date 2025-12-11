@@ -32,13 +32,13 @@ export default function App() {
           }
         />
 
-        {/* PAGE RÉSERVATIONS : admin uniquement */}
+        {/* PAGE RÉSERVATIONS : accessible à TOUS LES UTILISATEURS CONNECTÉS */}
         <Route
           path="/reservations"
           element={
-            <AdminRoute>
+            <PrivateRoute>
               <Reservations />
-            </AdminRoute>
+            </PrivateRoute>
           }
         />
 

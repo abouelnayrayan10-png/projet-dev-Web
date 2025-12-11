@@ -30,13 +30,9 @@ export async function login(email, password) {
 export function getAuthHeaders() {
   const token = localStorage.getItem("token");
 
-  if (!token) {
-    return {};
-  }
+  if (!token) return {};
 
-  return {
-    Authorization: `Bearer ${token}`,
-  };
+  return { Authorization: `Bearer ${token}` };
 }
 
 export function isAuthenticated() {
@@ -121,7 +117,7 @@ export async function deleteMaterial(id) {
 
 
 // ================================
-// Réservations — (MANQUAIT !)
+// Réservations
 // ================================
 export async function fetchReservations() {
   const response = await fetch(`${API_URL}/reservations`, {
@@ -139,18 +135,35 @@ export async function fetchReservations() {
   return response.json();
 }
 
-export async function createReservation(materialId, date) {
+// Le backend attend sûrement : userId (via token), materialId, startDate, endDate
+export async function createReservation(materialId, startDate, endDate) {
   const response = await fetch(`${API_URL}/reservations`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...getAuthHeaders(),
     },
-    body: JSON.stringify({ materialId, date }),
+    body: JSON.stringify({ materialId, startDate, endDate }),
   });
 
   if (!response.ok) {
     throw new Error("Erreur lors de la création de la réservation");
+  }
+
+  return response.json();
+}
+
+export async function deleteReservation(id) {
+  const response = await fetch(`${API_URL}/reservations/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Erreur lors de la suppression de la réservation");
   }
 
   return response.json();
