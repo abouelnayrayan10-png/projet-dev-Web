@@ -1,19 +1,29 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import Login from "./pages/Login";
 import Materials from "./pages/Materials";
 import Reservations from "./pages/Reservations";
+
 import { isAuthenticated, isAdmin } from "./api/api";
 
-// Route protégée : nécessite être connecté
+// ---------------------------
+// Route protégée : utilisateur connecté
+// ---------------------------
 function PrivateRoute({ children }) {
   return isAuthenticated() ? children : <Navigate to="/" />;
 }
 
-// Route protégée admin uniquement
+// ---------------------------
+// Route protégée : admin uniquement
+// (tu peux encore l'utiliser si besoin)
+// ---------------------------
 function AdminRoute({ children }) {
   return isAuthenticated() && isAdmin() ? children : <Navigate to="/materials" />;
 }
 
+// ---------------------------
+// APP PRINCIPALE
+// ---------------------------
 export default function App() {
   return (
     <BrowserRouter>
@@ -22,7 +32,7 @@ export default function App() {
         {/* PAGE LOGIN */}
         <Route path="/" element={<Login />} />
 
-        {/* PAGE MATÉRIEL : utilisateur connecté */}
+        {/* PAGE MATÉRIEL — accessible à tous les utilisateurs connectés */}
         <Route
           path="/materials"
           element={
@@ -32,7 +42,7 @@ export default function App() {
           }
         />
 
-        {/* PAGE RÉSERVATIONS : accessible à TOUS LES UTILISATEURS CONNECTÉS */}
+        {/* PAGE RÉSERVATIONS — accessible à TOUS LES UTILISATEURS CONNECTÉS */}
         <Route
           path="/reservations"
           element={

@@ -3,36 +3,32 @@
 // ================================
 export const API_URL = "http://localhost:3000/api";
 
-
 // ================================
 // Auth : Connexion
 // ================================
 export async function login(email, password) {
   const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
 
-  if (!response.ok) {
-    throw new Error("Identifiants incorrects");
-  }
+  if (!response.ok) throw new Error("Identifiants incorrects");
 
   return response.json(); // { token, role }
 }
-
 
 // ================================
 // Gestion du token
 // ================================
 export function getAuthHeaders() {
   const token = localStorage.getItem("token");
-
   if (!token) return {};
 
-  return { Authorization: `Bearer ${token}` };
+  return {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
 }
 
 export function isAuthenticated() {
@@ -51,66 +47,42 @@ export function isAdmin() {
 export async function fetchMaterials() {
   const response = await fetch(`${API_URL}/materials`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: getAuthHeaders(),
   });
 
-  if (!response.ok) {
-    throw new Error("Erreur lors de la récupération du matériel");
-  }
-
+  if (!response.ok) throw new Error("Erreur récupération matériel");
   return response.json();
 }
 
 export async function createMaterial(name, categoryId, available) {
   const response = await fetch(`${API_URL}/materials`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify({ name, categoryId, available }),
   });
 
-  if (!response.ok) {
-    throw new Error("Erreur lors de la création du matériel");
-  }
-
+  if (!response.ok) throw new Error("Erreur création matériel");
   return response.json();
 }
 
 export async function updateMaterial(id, name, categoryId, available) {
   const response = await fetch(`${API_URL}/materials/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify({ name, categoryId, available }),
   });
 
-  if (!response.ok) {
-    throw new Error("Erreur lors de la mise à jour du matériel");
-  }
-
+  if (!response.ok) throw new Error("Erreur mise à jour matériel");
   return response.json();
 }
 
 export async function deleteMaterial(id) {
   const response = await fetch(`${API_URL}/materials/${id}`, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: getAuthHeaders(),
   });
 
-  if (!response.ok) {
-    throw new Error("Erreur lors de la suppression du matériel");
-  }
-
+  if (!response.ok) throw new Error("Erreur suppression matériel");
   return response.json();
 }
 
@@ -122,31 +94,23 @@ export async function deleteMaterial(id) {
 export async function fetchReservations() {
   const response = await fetch(`${API_URL}/reservations`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: getAuthHeaders(),
   });
 
-  if (!response.ok) {
-    throw new Error("Erreur lors de la récupération des réservations");
-  }
-
+  if (!response.ok) throw new Error("Erreur récupération réservations");
   return response.json();
 }
 
-// Le backend attend sûrement : userId (via token), materialId, startDate, endDate
 export async function createReservation(materialId, startDate, endDate) {
   const response = await fetch(`${API_URL}/reservations`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify({ materialId, startDate, endDate }),
   });
 
   if (!response.ok) {
+    const err = await response.json();
+    console.error("BACKEND ERROR :", err);
     throw new Error("Erreur lors de la création de la réservation");
   }
 
@@ -156,15 +120,9 @@ export async function createReservation(materialId, startDate, endDate) {
 export async function deleteReservation(id) {
   const response = await fetch(`${API_URL}/reservations/${id}`, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    }
+    headers: getAuthHeaders(),
   });
 
-  if (!response.ok) {
-    throw new Error("Erreur lors de la suppression de la réservation");
-  }
-
+  if (!response.ok) throw new Error("Erreur suppression réservation");
   return response.json();
 }

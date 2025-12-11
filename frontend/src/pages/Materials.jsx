@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   fetchMaterials,
   createMaterial,
   updateMaterial,
   deleteMaterial,
 } from "../api/api";
+
 import Table from "../components/Table";
+import { useNavigate } from "react-router-dom";
 
 export default function Materials() {
   const [materials, setMaterials] = useState([]);
@@ -16,8 +17,8 @@ export default function Materials() {
   const [editId, setEditId] = useState(null);
   const [error, setError] = useState("");
 
+  const role = localStorage.getItem("role");
   const navigate = useNavigate();
-  const role = localStorage.getItem("role"); // user / admin
 
   async function loadMaterials() {
     try {
@@ -32,12 +33,18 @@ export default function Materials() {
     loadMaterials();
   }, []);
 
+  function handleReserve(materialId) {
+    navigate("/reservations?materialId=" + materialId);
+  }
+
   async function handleCreate(e) {
     e.preventDefault();
+
     if (!name || !categoryId) {
       setError("Tous les champs sont obligatoires");
       return;
     }
+
     try {
       await createMaterial(name, Number(categoryId), available);
       setName("");
@@ -76,11 +83,18 @@ export default function Materials() {
     { header: "ID", accessor: "id" },
     { header: "Nom", accessor: "name" },
     { header: "Catégorie", accessor: "categoryId" },
-    { 
-      header: "Disponible", 
+
+    // 🔥 colonne Disponible en mode "Oui / Non" coloré
+    {
+      header: "Disponible",
       accessor: "available",
-      render: (row) => (row.available ? "Oui" : "Non")
-    }
+      cell: (value) =>
+        value ? (
+          <span style={{ color: "#2ecc71", fontWeight: "bold" }}>Oui</span>
+        ) : (
+          <span style={{ color: "#e74c3c", fontWeight: "bold" }}>Non</span>
+        ),
+    },
   ];
 
   return (
@@ -94,7 +108,24 @@ export default function Materials() {
         data={materials}
         renderActions={(row) => (
           <>
-            {role === "admin" ? (
+            {/* 🔥 BOUTON RÉSERVER — vert si dispo, gris si non */}
+            <button
+              onClick={() => handleReserve(row.id)}
+              disabled={!row.available}
+              style={{
+                backgroundColor: row.available ? "#2ecc71" : "#555",
+                color: "white",
+                borderRadius: "8px",
+                padding: "8px 16px",
+                cursor: row.available ? "pointer" : "not-allowed",
+                border: "none",
+              }}
+            >
+              Réserver
+            </button>
+
+            {/* 🔥 BOUTONS ADMIN */}
+            {role === "admin" && (
               <>
                 <button
                   onClick={() => {
@@ -103,27 +134,40 @@ export default function Materials() {
                     setCategoryId(row.categoryId);
                     setAvailable(row.available);
                   }}
+                  style={{
+                    marginLeft: "10px",
+                    backgroundColor: "#3498db",
+                    color: "white",
+                    borderRadius: "8px",
+                    padding: "8px 16px",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
                 >
                   Modifier
                 </button>
+
                 <button
                   onClick={() => handleDelete(row.id)}
-                  style={{ marginLeft: "10px" }}
+                  style={{
+                    marginLeft: "10px",
+                    backgroundColor: "#e74c3c",
+                    color: "white",
+                    borderRadius: "8px",
+                    padding: "8px 16px",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
                 >
                   Supprimer
                 </button>
               </>
-            ) : (
-              <button
-                onClick={() => navigate(`/reservations?material=${row.id}`)}
-              >
-                Réserver
-              </button>
             )}
           </>
         )}
       />
 
+      {/* 🔥 FORMULAIRE ADMIN */}
       {role === "admin" && (
         <>
           <h3>{editId ? "Modifier un matériel" : "Ajouter un matériel"}</h3>

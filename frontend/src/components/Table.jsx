@@ -1,56 +1,55 @@
-// Composant de tableau générique réutilisable
-// props : columns (tableau d'objets { header, accessor })
-//         data (tableau de lignes)
-//         renderActions (optionnel : fonction qui retourne des boutons d'action)
- 
 export default function Table({ columns, data, renderActions }) {
   return (
-<table style={{ borderCollapse: "collapse", width: "100%" }}>
-<thead>
-<tr>
+    <table style={styles.table}>
+      <thead>
+        <tr>
           {columns.map((col) => (
-<th
-              key={col.accessor}
-              style={{ border: "1px solid #ccc", padding: "8px" }}
->
-              {col.header}
-</th>
+            <th key={col.header} style={styles.th}>{col.header}</th>
           ))}
-          {renderActions && (
-<th style={{ border: "1px solid #ccc", padding: "8px" }}>Actions</th>
-          )}
-</tr>
-</thead>
-<tbody>
-        {data.length === 0 && (
-<tr>
-<td
-              colSpan={columns.length + (renderActions ? 1 : 0)}
-              style={{ padding: "8px", textAlign: "center" }}
->
-              Aucune donnée
-</td>
-</tr>
-        )}
- 
+          {renderActions && <th style={styles.th}>Actions</th>}
+        </tr>
+      </thead>
+
+      <tbody>
         {data.map((row) => (
-<tr key={row.id}>
+          <tr key={row.id} style={styles.tr}>
             {columns.map((col) => (
-<td
-                key={col.accessor}
-                style={{ border: "1px solid #ccc", padding: "8px" }}
->
+              <td key={col.accessor} style={styles.td}>
                 {row[col.accessor]}
-</td>
+              </td>
             ))}
             {renderActions && (
-<td style={{ border: "1px solid #ccc", padding: "8px" }}>
-                {renderActions(row)}
-</td>
+              <td style={styles.td}>{renderActions(row)}</td>
             )}
-</tr>
+          </tr>
         ))}
-</tbody>
-</table>
+      </tbody>
+    </table>
   );
 }
+
+const styles = {
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    marginTop: "20px",
+    border: "1px solid #00e1ff33",
+    background: "#0d1327",
+    color: "#d8eeff",
+    borderRadius: "8px",
+    overflow: "hidden",
+  },
+  th: {
+    padding: "14px",
+    background: "#091021",
+    color: "#00e1ff",
+    borderBottom: "2px solid #00e1ff55",
+    textAlign: "left",
+  },
+  tr: {
+    borderBottom: "1px solid #00e1ff22",
+  },
+  td: {
+    padding: "12px",
+  },
+};

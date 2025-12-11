@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { 
-  fetchReservations, 
-  createReservation, 
-  deleteReservation 
+import {
+  fetchReservations,
+  createReservation,
+  deleteReservation,
 } from "../api/api";
 import Table from "../components/Table";
+import { useSearchParams } from "react-router-dom";
 
 export default function Reservations() {
   const [reservations, setReservations] = useState([]);
@@ -14,7 +15,17 @@ export default function Reservations() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const role = localStorage.getItem("role");
+  const role = localStorage.getItem("role"); // "user" ou "admin"
+
+  const [searchParams] = useSearchParams();
+  const autoMaterialId = searchParams.get("materialId");
+
+  // Auto-remplir le matériel si on arrive depuis "Réserver"
+  useEffect(() => {
+    if (autoMaterialId) {
+      setMaterialId(autoMaterialId);
+    }
+  }, [autoMaterialId]);
 
   async function loadReservations() {
     try {
@@ -43,11 +54,16 @@ export default function Reservations() {
 
     try {
       await createReservation(Number(materialId), startDate, endDate);
+
+      // vider le formulaire
       setMaterialId("");
       setStartDate("");
       setEndDate("");
+
+      // recharger la liste
       await loadReservations();
     } catch (err) {
+      // message générique côté front
       setError("Erreur lors de la création de la réservation.");
     }
   }
@@ -57,7 +73,7 @@ export default function Reservations() {
       await deleteReservation(id);
       await loadReservations();
     } catch (err) {
-      setError("Erreur lors de la suppression.");
+      alert("Erreur suppression de la réservation");
     }
   }
 
@@ -81,51 +97,52 @@ export default function Reservations() {
       <Table
         columns={columns}
         data={reservations}
-        renderActions={
-          role === "admin"
-            ? (row) => (
-                <button
-                  onClick={() => handleDelete(row.id)}
-                  style={{ background: "red", color: "white" }}
-                >
-                  Supprimer
-                </button>
-              )
-            : null
+        renderActions={(row) =>
+          role === "admin" ? (
+            <button
+              onClick={() => handleDelete(row.id)}
+              style={{
+                backgroundColor: "#e74c3c",
+                color: "white",
+                borderRadius: "6px",
+                padding: "6px 12px",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              Supprimer
+            </button>
+          ) : null
         }
       />
 
-      {role !== "admin" && (
-        <>
-          <h3>Créer une réservation</h3>
+      <h3 style={{ marginTop: "20px" }}>Créer une réservation</h3>
 
-          <form 
-            onSubmit={handleSubmit} 
-            style={{ display: "flex", gap: "8px" }}
-          >
-            <input
-              type="number"
-              placeholder="ID matériel"
-              value={materialId}
-              onChange={(e) => setMaterialId(e.target.value)}
-            />
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "flex", gap: "8px", alignItems: "center" }}
+      >
+        <input
+          type="number"
+          placeholder="ID matériel"
+          value={materialId}
+          onChange={(e) => setMaterialId(e.target.value)}
+        />
 
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+        />
 
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
+        <input
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+        />
 
-            <button type="submit">Réserver</button>
-          </form>
-        </>
-      )}
+        <button type="submit">Réserver</button>
+      </form>
     </div>
   );
 }
