@@ -14,10 +14,14 @@ export default function Header() {
       <h1 style={styles.title}>⚡ FuturLab — Gestion du Matériel</h1>
 
       <nav style={styles.nav}>
-        <Link style={styles.link} to="/materials">Matériel</Link>
+        <Link style={styles.link} to="/materials">
+          Matériel
+        </Link>
 
         {role === "admin" && (
-          <Link style={styles.link} to="/reservations">Réservations</Link>
+          <Link style={styles.link} to="/reservations">
+            Réservations
+          </Link>
         )}
 
         <button style={styles.logout} onClick={logout}>
@@ -38,17 +42,20 @@ const styles = {
     borderBottom: "2px solid #00e1ff",
     boxShadow: "0 0 20px #00e1ff55",
   },
+
   title: {
     color: "#00e1ff",
     margin: 0,
     fontFamily: "Orbitron, sans-serif",
     letterSpacing: "2px",
   },
+
   nav: {
     display: "flex",
     gap: "20px",
     alignItems: "center",
   },
+
   link: {
     color: "#b9dfff",
     textDecoration: "none",
@@ -57,6 +64,7 @@ const styles = {
     border: "1px solid #00e1ff55",
     transition: "0.2s",
   },
+
   logout: {
     backgroundColor: "#ff003c",
     color: "white",
