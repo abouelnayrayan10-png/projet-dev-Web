@@ -6,7 +6,7 @@ export default function Sidebar() {
       <h2 style={styles.title}>📦 Matériel</h2>
 
       <nav style={styles.nav}>
-        <Link to="/" style={styles.link}>🏠 Accueil</Link>
+        <Link to="/materials" style={styles.link}>🏠 Accueil</Link>
         <Link to="/materials" style={styles.link}>📁 Matériel</Link>
         <Link to="/reservations" style={styles.link}>📅 Réservations</Link>
       </nav>
