@@ -1,4 +1,7 @@
 export default function Table({ columns, data, renderActions }) {
+  // Petite sécurité si data est vide pour éviter un crash
+  if (!data) return <div style={{ color: "white", padding: "20px" }}>Chargement...</div>;
+
   return (
     <table style={styles.table}>
       <thead>
@@ -15,7 +18,11 @@ export default function Table({ columns, data, renderActions }) {
           <tr key={row.id} style={styles.tr}>
             {columns.map((col) => (
               <td key={col.accessor} style={styles.td}>
-                {row[col.accessor]}
+                {/* CORRECTION ICI : On vérifie si une règle 'cell' existe */}
+                {col.cell 
+                  ? col.cell(row[col.accessor], row) // Si oui, on utilise ta fonction personnalisée (boutons, couleurs...)
+                  : row[col.accessor] // Sinon, on affiche le texte brut
+                }
               </td>
             ))}
             {renderActions && (
@@ -51,5 +58,6 @@ const styles = {
   },
   td: {
     padding: "12px",
+    verticalAlign: "middle", // Ajouté pour centrer les boutons verticalement
   },
 };
