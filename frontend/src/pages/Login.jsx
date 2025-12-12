@@ -18,7 +18,7 @@ export default function Login() {
       localStorage.setItem("token", result.token);
       localStorage.setItem("role", result.role);
 
-      navigate("/materials");
+      navigate("/home");
     } catch (err) {
       setError("Email ou mot de passe incorrect");
     }
