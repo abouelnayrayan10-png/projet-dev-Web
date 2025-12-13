@@ -9,4 +9,6 @@ procedure de lancement :
 8) ouvrir un navigateur a l'adresse : http://localhost:5173
 9) compte user : Email : user@test.com ; Mot de passe : 1234
 10) compte admin : Email : admin@test.com ; Mot de passe : admin123
-11) 
+
+
+VOICI LE LIEN DE LA VIDEO (Lien Youtube non répertorié): https://youtu.be/v2Q-rbKVd5M
