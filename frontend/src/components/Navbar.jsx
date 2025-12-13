@@ -27,7 +27,7 @@ export default function Navbar() {
         {/* Logo avec effet Glow */}
         <div onClick={() => navigate("/home")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "10px" }}>
           <span style={{ fontSize: "1.8rem" }}>⚡</span>
-          <h1 style={styles.title}>FuturLab</h1>
+          <h1 style={styles.title}>KarlShop</h1>
         </div>
 
         {/* Menu de navigation */}
