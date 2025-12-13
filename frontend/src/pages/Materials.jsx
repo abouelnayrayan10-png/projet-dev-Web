@@ -95,7 +95,7 @@ export default function Materials() {
   const columns = [
     { header: "ID", accessor: "id" },
     { header: "Nom", accessor: "name" },
-    { header: "Catégorie", accessor: "categoryId" },
+    { header: "Quantité", accessor: "quantity" },
     {
       header: "Disponible",
       accessor: "available",
@@ -212,7 +212,7 @@ export default function Materials() {
             <div style={{ width: "100px" }}>
               <input
                 type="number"
-                placeholder="ID Cat."
+                placeholder="Quantité"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
                 style={inputStyle}

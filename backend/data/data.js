@@ -20,9 +20,9 @@ exports.users = [
 
 // --- MATERIELS ---
 exports.materials = [
-  { id: 1, name: "Caméra HD", categoryId: 2, available: true },
-  { id: 2, name: "Micro", categoryId: 1, available: true },
-  { id: 3, name: "PC portable", categoryId: 3, available: true }
+  { id: 1, name: "Caméra HD", quantity: 2, available: true },
+  { id: 2, name: "Micro", quantity: 1, available: true },
+  { id: 3, name: "PC portable", quantity: 3, available: true }
 ];
 
 // --- RÉSERVATIONS ---
