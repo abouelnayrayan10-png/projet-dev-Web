@@ -1,19 +1,18 @@
 const { materials } = require("../data/data");
 
 // ===============================
-// GET /api/materials
+// GET : liste
 // ===============================
 exports.list = (req, res) => {
   res.status(200).json(materials);
 };
 
 // ===============================
-// POST /api/materials
+// POST : création
 // ===============================
 exports.create = (req, res) => {
-  const { name, quantity, available } = req.body;
+  const { name, quantity } = req.body;
 
-  // 🔒 vérification des champs
   if (!name || quantity === undefined) {
     return res.status(400).json({
       message: "name et quantity sont obligatoires",
@@ -26,7 +25,7 @@ exports.create = (req, res) => {
       : 1,
     name,
     quantity: Number(quantity),
-    available: available !== undefined ? available : quantity > 0,
+    available: Number(quantity) > 0, // 🔥 LOGIQUE MÉTIER
   };
 
   materials.push(newMaterial);
@@ -34,14 +33,13 @@ exports.create = (req, res) => {
 };
 
 // ===============================
-// PUT /api/materials/:id
+// PUT : mise à jour
 // ===============================
 exports.update = (req, res) => {
   const id = Number(req.params.id);
-  const { name, quantity, available } = req.body;
+  const { name, quantity } = req.body;
 
   const material = materials.find((m) => m.id === id);
-
   if (!material) {
     return res.status(404).json({ message: "Matériel introuvable" });
   }
@@ -50,24 +48,19 @@ exports.update = (req, res) => {
 
   if (quantity !== undefined) {
     material.quantity = Number(quantity);
-    material.available = material.quantity > 0;
-  }
-
-  if (available !== undefined) {
-    material.available = available;
+    material.available = Number(quantity) > 0; // 🔥 recalcul automatique
   }
 
   res.status(200).json(material);
 };
 
 // ===============================
-// DELETE /api/materials/:id
+// DELETE : suppression
 // ===============================
 exports.remove = (req, res) => {
   const id = Number(req.params.id);
 
   const index = materials.findIndex((m) => m.id === id);
-
   if (index === -1) {
     return res.status(404).json({ message: "Matériel introuvable" });
   }

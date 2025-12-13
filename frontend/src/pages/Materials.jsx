@@ -15,10 +15,9 @@ export default function Materials() {
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState("");
 
-  // États du formulaire
+  // Formulaire
   const [name, setName] = useState("");
-  const [categoryId, setCategoryId] = useState(""); 
-  const [available, setAvailable] = useState(true);
+  const [quantity, setQuantity] = useState("");
   const [editId, setEditId] = useState(null);
 
   const role = localStorage.getItem("role");
@@ -38,9 +37,9 @@ export default function Materials() {
     loadMaterials();
   }, []);
 
-  // --- FILTRE RECHERCHE ---
-  const filteredMaterials = materials.filter((material) =>
-    material.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // --- FILTRE ---
+  const filteredMaterials = materials.filter((m) =>
+    m.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // --- ACTIONS ---
@@ -50,12 +49,14 @@ export default function Materials() {
 
   async function handleCreate(e) {
     e.preventDefault();
-    if (!name || !categoryId) {
+
+    if (!name || quantity === "") {
       setError("Tous les champs sont obligatoires");
       return;
     }
+
     try {
-      await createMaterial(name, categoryId, available);
+      await createMaterial(name, Number(quantity));
       resetForm();
       await loadMaterials();
     } catch (err) {
@@ -65,8 +66,9 @@ export default function Materials() {
 
   async function handleUpdate() {
     if (!editId) return;
+
     try {
-      await updateMaterial(editId, name, categoryId, available);
+      await updateMaterial(editId, name, Number(quantity));
       resetForm();
       await loadMaterials();
     } catch (err) {
@@ -86,8 +88,7 @@ export default function Materials() {
   function resetForm() {
     setEditId(null);
     setName("");
-    setCategoryId("");
-    setAvailable(true);
+    setQuantity("");
     setError("");
   }
 
@@ -100,11 +101,11 @@ export default function Materials() {
       header: "Disponible",
       accessor: "available",
       cell: (value, row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
           {value ? (
-            <span style={{ color: "#2ecc71", fontWeight: "bold", minWidth: "40px" }}>Oui</span>
+            <span style={{ color: "#2ecc71", fontWeight: "bold" }}>Oui</span>
           ) : (
-            <span style={{ color: "#e74c3c", fontWeight: "bold", minWidth: "40px" }}>Non</span>
+            <span style={{ color: "#e74c3c", fontWeight: "bold" }}>Non</span>
           )}
 
           <button
@@ -119,7 +120,6 @@ export default function Materials() {
               cursor: value ? "pointer" : "not-allowed",
               fontWeight: "bold",
               fontSize: "0.85rem",
-              transition: "0.2s"
             }}
           >
             {value ? "Réserver" : "Indisp."}
@@ -131,29 +131,17 @@ export default function Materials() {
 
   // --- RENDU ---
   return (
-    <div style={{ maxWidth: "1000px", margin: "40px auto", color: "white", fontFamily: "Segoe UI, sans-serif" }}>
-      <h2 style={{ marginBottom: "20px", color: "#00e1ff", borderBottom: "1px solid #333", paddingBottom: "10px" }}>
-        Gestion du matériel
-      </h2>
+    <div style={containerStyle}>
+      <h2 style={titleStyle}>Gestion du matériel</h2>
 
-      {error && <div style={{ color: "#ff4d4d", marginBottom: "15px", backgroundColor: "rgba(255, 77, 77, 0.1)", padding: "10px", borderRadius: "5px" }}>{error}</div>}
+      {error && <div style={errorStyle}>{error}</div>}
 
       <input
         type="text"
         placeholder="🔍 Rechercher un équipement..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "12px",
-          marginBottom: "20px",
-          borderRadius: "8px",
-          border: "1px solid #333",
-          backgroundColor: "#1e1e1e",
-          color: "white",
-          fontSize: "1rem",
-          outline: "none",
-        }}
+        style={searchStyle}
       />
 
       <Table
@@ -166,11 +154,9 @@ export default function Materials() {
                 onClick={() => {
                   setEditId(row.id);
                   setName(row.name);
-                  setCategoryId(row.categoryId);
-                  setAvailable(row.available);
+                  setQuantity(row.quantity);
                 }}
                 style={actionButtonStyle("#3498db")}
-                title="Modifier"
               >
                 ✏️
               </button>
@@ -178,7 +164,6 @@ export default function Materials() {
               <button
                 onClick={() => handleDelete(row.id)}
                 style={actionButtonStyle("#e74c3c")}
-                title="Supprimer"
               >
                 🗑️
               </button>
@@ -188,73 +173,38 @@ export default function Materials() {
       />
 
       {role === "admin" && (
-        <div style={{ marginTop: "30px", padding: "20px", backgroundColor: "#1e1e1e", borderRadius: "10px", border: "1px solid #333" }}>
-          <h3 style={{ color: "#00e1ff", marginTop: 0, marginBottom: "15px", fontSize: "1.1rem" }}>
-            {editId ? "Modifier un matériel" : "Ajouter un nouvel équipement"}
+        <div style={formContainerStyle}>
+          <h3 style={{ color: "#00e1ff" }}>
+            {editId ? "Modifier un matériel" : "Ajouter un équipement"}
           </h3>
 
           <form
             onSubmit={editId ? handleUpdate : handleCreate}
-            style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}
+            style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}
           >
-            {/* Champ NOM : Largeur fixe */}
-            <div style={{ width: "300px" }}>
-              <input
-                type="text"
-                placeholder="Nom de l'équipement"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                style={inputStyle}
-              />
-            </div>
+            <input
+              type="text"
+              placeholder="Nom"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              style={inputStyle}
+            />
 
-            {/* Champ CATÉGORIE : Petit */}
-            <div style={{ width: "100px" }}>
-              <input
-                type="number"
-                placeholder="Quantité"
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                style={inputStyle}
-                min="0"
-              />
-            </div>
+            <input
+              type="number"
+              placeholder="Quantité"
+              min="0"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              style={inputStyle}
+            />
 
-            {/* Champ DISPONIBLE : Ajusté */}
-            <div style={{ width: "140px" }}>
-              <select
-                value={available ? "true" : "false"}
-                onChange={(e) => setAvailable(e.target.value === "true")}
-                style={inputStyle}
-              >
-                <option value="true">Disponible</option>
-                <option value="false">Indisponible</option>
-              </select>
-            </div>
-
-            <button
-              type="submit"
-              style={{
-                backgroundColor: "#00e1ff",
-                color: "#121212",
-                fontWeight: "bold",
-                padding: "8px 20px",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                transition: "0.2s",
-                height: "38px"
-              }}
-            >
+            <button type="submit" style={submitStyle}>
               {editId ? "Mettre à jour" : "Ajouter"}
             </button>
-            
+
             {editId && (
-              <button 
-                type="button" 
-                onClick={resetForm}
-                style={{ background: "transparent", color: "#888", border: "1px solid #555", padding: "8px 15px", borderRadius: "6px", cursor: "pointer", height: "38px"}}
-              >
+              <button type="button" onClick={resetForm} style={cancelStyle}>
                 Annuler
               </button>
             )}
@@ -265,18 +215,70 @@ export default function Materials() {
   );
 }
 
-// --- STYLES UTILITAIRES ---
-const inputStyle = {
+/* ---------- STYLES ---------- */
+
+const containerStyle = {
+  maxWidth: "1000px",
+  margin: "40px auto",
+  color: "white",
+  fontFamily: "Segoe UI, sans-serif",
+};
+
+const titleStyle = {
+  marginBottom: "20px",
+  color: "#00e1ff",
+  borderBottom: "1px solid #333",
+  paddingBottom: "10px",
+};
+
+const errorStyle = {
+  color: "#ff4d4d",
+  marginBottom: "15px",
+};
+
+const searchStyle = {
   width: "100%",
-  padding: "8px 12px", // Moins haut
+  padding: "12px",
+  marginBottom: "20px",
+  borderRadius: "8px",
+  border: "1px solid #333",
+  backgroundColor: "#1e1e1e",
+  color: "white",
+};
+
+const formContainerStyle = {
+  marginTop: "30px",
+  padding: "20px",
+  backgroundColor: "#1e1e1e",
+  borderRadius: "10px",
+  border: "1px solid #333",
+};
+
+const inputStyle = {
+  padding: "8px 12px",
   borderRadius: "6px",
   border: "1px solid #444",
   backgroundColor: "#2c2c2c",
   color: "white",
-  fontSize: "0.9rem",
-  outline: "none",
-  height: "38px", // Hauteur fixe alignée avec le bouton
-  boxSizing: "border-box"
+};
+
+const submitStyle = {
+  backgroundColor: "#00e1ff",
+  color: "#121212",
+  fontWeight: "bold",
+  padding: "8px 20px",
+  border: "none",
+  borderRadius: "6px",
+  cursor: "pointer",
+};
+
+const cancelStyle = {
+  background: "transparent",
+  color: "#888",
+  border: "1px solid #555",
+  padding: "8px 15px",
+  borderRadius: "6px",
+  cursor: "pointer",
 };
 
 const actionButtonStyle = (color) => ({
@@ -286,6 +288,4 @@ const actionButtonStyle = (color) => ({
   padding: "8px 12px",
   border: "none",
   cursor: "pointer",
-  fontSize: "1rem",
-  transition: "opacity 0.2s"
 });

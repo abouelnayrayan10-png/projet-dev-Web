@@ -39,8 +39,6 @@ export function isAdmin() {
   return localStorage.getItem("role") === "admin";
 }
 
-
-
 // ================================
 // Matériel
 // ================================
@@ -54,22 +52,22 @@ export async function fetchMaterials() {
   return response.json();
 }
 
-export async function createMaterial(name, categoryId, available) {
+export async function createMaterial(name, quantity, available) {
   const response = await fetch(`${API_URL}/materials`, {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ name, categoryId, available }),
+    body: JSON.stringify({ name, quantity, available }),
   });
 
   if (!response.ok) throw new Error("Erreur création matériel");
   return response.json();
 }
 
-export async function updateMaterial(id, name, categoryId, available) {
+export async function updateMaterial(id, name, quantity, available) {
   const response = await fetch(`${API_URL}/materials/${id}`, {
     method: "PUT",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ name, categoryId, available }),
+    body: JSON.stringify({ name, quantity, available }),
   });
 
   if (!response.ok) throw new Error("Erreur mise à jour matériel");
@@ -85,8 +83,6 @@ export async function deleteMaterial(id) {
   if (!response.ok) throw new Error("Erreur suppression matériel");
   return response.json();
 }
-
-
 
 // ================================
 // Réservations
