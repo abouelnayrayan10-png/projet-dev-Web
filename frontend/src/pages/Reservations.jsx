@@ -1,11 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import {
   fetchReservations,
+  fetchMaterials,
   createReservation,
   deleteReservation,
+  updateReservation,
 } from "../api/api";
 import Table from "../components/Table";
 import { useSearchParams } from "react-router-dom";
+
 
 export default function Reservations() {
   const [reservations, setReservations] = useState([]);
@@ -14,41 +17,56 @@ export default function Reservations() {
   const [endDate, setEndDate] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [materials, setMaterials] = useState([]);
+
+
+  // 🔥 Édition (USER)
+  const [editId, setEditId] = useState(null);
+  const [editStartDate, setEditStartDate] = useState("");
+  const [editEndDate, setEditEndDate] = useState("");
 
   const role = localStorage.getItem("role");
   const [searchParams] = useSearchParams();
   const autoMaterialId = searchParams.get("materialId");
 
-  // 🔥 Empêcher le double load (cause du bug de duplication)
+  // 🔥 Empêcher le double load
   const firstLoad = useRef(true);
 
-  async function loadReservations() {
-    try {
-      setLoading(true);
-      const data = await fetchReservations();
-      setReservations(data);
-    } catch (err) {
-      setError("Impossible de charger les réservations.");
-    } finally {
-      setLoading(false);
-    }
-  }
+ async function loadReservations() {
+  try {
+    setLoading(true);
 
-  // 🔥 Chargement PROPRE : 1 seule fois
+    const [resData, matData] = await Promise.all([
+      fetchReservations(),
+      fetchMaterials(),
+    ]);
+
+    setReservations(resData);
+    setMaterials(matData);
+  } catch (err) {
+    setError("Impossible de charger les réservations.");
+  } finally {
+    setLoading(false);
+  }
+}
+
+
   useEffect(() => {
     if (!firstLoad.current) return;
     firstLoad.current = false;
-
     loadReservations();
   }, []);
 
-  // Auto-remplissage du matériel
+  // Auto-remplissage depuis matériel
   useEffect(() => {
     if (autoMaterialId) {
       setMaterialId(autoMaterialId);
     }
   }, [autoMaterialId]);
 
+  // ------------------------
+  // CRÉATION
+  // ------------------------
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
@@ -60,17 +78,18 @@ export default function Reservations() {
 
     try {
       await createReservation(Number(materialId), startDate, endDate);
-
       setMaterialId("");
       setStartDate("");
       setEndDate("");
-
       await loadReservations();
     } catch (err) {
       setError("Erreur lors de la création de la réservation.");
     }
   }
 
+  // ------------------------
+  // SUPPRESSION / ANNULATION
+  // ------------------------
   async function handleDelete(id) {
     try {
       await deleteReservation(id);
@@ -80,17 +99,41 @@ export default function Reservations() {
     }
   }
 
+  // ------------------------
+  // MODIFICATION (USER)
+  // ------------------------
+  async function handleUpdate(id) {
+    try {
+      await updateReservation(id, editStartDate, editEndDate);
+      setEditId(null);
+      await loadReservations();
+    } catch (err) {
+      alert("Erreur modification réservation");
+    }
+  }
+function getMaterialName(materialId) {
+  const material = materials.find((m) => m.id === materialId);
+  return material ? material.name : "Inconnu";
+}
+
+  // ------------------------
+  // COLONNES
+  // ------------------------
   const columns = [
     { header: "ID", accessor: "id" },
     { header: "Utilisateur", accessor: "userId" },
-    { header: "Matériel", accessor: "materialId" },
+    {
+  header: "Matériel",
+  accessor: "materialId",
+  cell: (value) => getMaterialName(value),
+},
+,
     { header: "Début", accessor: "startDate" },
     { header: "Fin", accessor: "endDate" },
   ];
 
   return (
     <div style={styles.container}>
-
       <h2 style={styles.title}>
         {role === "admin" ? "Toutes les réservations" : "Mes réservations"}
       </h2>
@@ -98,23 +141,78 @@ export default function Reservations() {
       {loading && <p>Chargement...</p>}
       {error && <p style={styles.error}>{error}</p>}
 
-      {/* TABLE FUTURISTE */}
       <Table
         columns={columns}
         data={reservations}
-        renderActions={(row) =>
-          role === "admin" ? (
-            <button
-              onClick={() => handleDelete(row.id)}
-              style={styles.deleteBtn}
-            >
-              Supprimer
-            </button>
-          ) : null
-        }
+        renderActions={(row) => {
+          // ✏️ MODE ÉDITION (USER)
+          if (editId === row.id) {
+            return (
+              <div style={{ display: "flex", gap: "6px" }}>
+                <input
+                  type="date"
+                  value={editStartDate}
+                  onChange={(e) => setEditStartDate(e.target.value)}
+                />
+                <input
+                  type="date"
+                  value={editEndDate}
+                  onChange={(e) => setEditEndDate(e.target.value)}
+                />
+                <button
+                  onClick={() => handleUpdate(row.id)}
+                  style={styles.saveBtn}
+                >
+                  ✔
+                </button>
+                <button
+                  onClick={() => setEditId(null)}
+                  style={styles.cancelBtn}
+                >
+                  ✖
+                </button>
+              </div>
+            );
+          }
+
+          // 👑 ADMIN
+          if (role === "admin") {
+            return (
+              <button
+                onClick={() => handleDelete(row.id)}
+                style={styles.deleteBtn}
+              >
+                Supprimer
+              </button>
+            );
+          }
+
+          // 👤 USER
+          return (
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                onClick={() => {
+                  setEditId(row.id);
+                  setEditStartDate(row.startDate);
+                  setEditEndDate(row.endDate);
+                }}
+                style={styles.editBtn}
+              >
+                Modifier
+              </button>
+
+              <button
+                onClick={() => handleDelete(row.id)}
+                style={styles.deleteBtn}
+              >
+                Annuler
+              </button>
+            </div>
+          );
+        }}
       />
 
-      {/* FORMULAIRE DE RÉSERVATION */}
+      {/* FORMULAIRE CRÉATION */}
       <h3 style={styles.subtitle}>Créer une réservation</h3>
 
       <form onSubmit={handleSubmit} style={styles.form}>
@@ -148,9 +246,9 @@ export default function Reservations() {
   );
 }
 
-// --------------------------------------------------------
-// 🔥 STYLES FUTURISTES
-// --------------------------------------------------------
+// ------------------------
+// STYLES
+// ------------------------
 const styles = {
   container: {
     maxWidth: "900px",
@@ -163,7 +261,6 @@ const styles = {
     fontSize: "28px",
     textAlign: "center",
     marginBottom: "20px",
-    textShadow: "0 0 10px #00eaff",
   },
   subtitle: {
     color: "#b8d8ff",
@@ -195,12 +292,36 @@ const styles = {
     fontWeight: "bold",
     cursor: "pointer",
   },
+  editBtn: {
+    background: "#3498db",
+    color: "white",
+    border: "none",
+    padding: "6px 10px",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
   deleteBtn: {
-    padding: "6px 12px",
     background: "#e74c3c",
     color: "white",
-    borderRadius: "6px",
     border: "none",
+    padding: "6px 10px",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
+  saveBtn: {
+    background: "#2ecc71",
+    color: "white",
+    border: "none",
+    padding: "6px 10px",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
+  cancelBtn: {
+    background: "#555",
+    color: "white",
+    border: "none",
+    padding: "6px 10px",
+    borderRadius: "6px",
     cursor: "pointer",
   },
 };

@@ -1,15 +1,30 @@
-const { materials } = require("../data/data");
+const { materials, reservations } = require("../data/data");
 
-// ===============================
-// GET : liste
-// ===============================
+// GET /api/materials
 exports.list = (req, res) => {
-  res.status(200).json(materials);
+  const today = new Date().toISOString().split("T")[0];
+
+  const enrichedMaterials = materials.map((material) => {
+    const activeReservations = reservations.filter(
+      (r) =>
+        r.materialId === material.id &&
+        r.startDate <= today &&
+        r.endDate >= today
+    );
+
+    const remaining = material.quantity - activeReservations.length;
+
+    return {
+      ...material,
+      remaining,
+      available: remaining > 0,
+    };
+  });
+
+  res.status(200).json(enrichedMaterials);
 };
 
-// ===============================
-// POST : création
-// ===============================
+// POST /api/materials
 exports.create = (req, res) => {
   const { name, quantity } = req.body;
 
@@ -25,16 +40,13 @@ exports.create = (req, res) => {
       : 1,
     name,
     quantity: Number(quantity),
-    available: Number(quantity) > 0, // 🔥 LOGIQUE MÉTIER
   };
 
   materials.push(newMaterial);
   res.status(201).json(newMaterial);
 };
 
-// ===============================
-// PUT : mise à jour
-// ===============================
+// PUT /api/materials/:id
 exports.update = (req, res) => {
   const id = Number(req.params.id);
   const { name, quantity } = req.body;
@@ -45,22 +57,16 @@ exports.update = (req, res) => {
   }
 
   if (name !== undefined) material.name = name;
+  if (quantity !== undefined) material.quantity = Number(quantity);
 
-  if (quantity !== undefined) {
-    material.quantity = Number(quantity);
-    material.available = Number(quantity) > 0; // 🔥 recalcul automatique
-  }
-
-  res.status(200).json(material);
+  res.json(material);
 };
 
-// ===============================
-// DELETE : suppression
-// ===============================
+// DELETE /api/materials/:id
 exports.remove = (req, res) => {
   const id = Number(req.params.id);
-
   const index = materials.findIndex((m) => m.id === id);
+
   if (index === -1) {
     return res.status(404).json({ message: "Matériel introuvable" });
   }
@@ -68,8 +74,5 @@ exports.remove = (req, res) => {
   const deleted = materials[index];
   materials.splice(index, 1);
 
-  res.status(200).json({
-    message: "Matériel supprimé",
-    deleted,
-  });
+  res.json({ message: "Matériel supprimé", deleted });
 };

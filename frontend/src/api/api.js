@@ -15,7 +15,7 @@ export async function login(email, password) {
 
   if (!response.ok) throw new Error("Identifiants incorrects");
 
-  return response.json(); // { token, role }
+  return response.json(); // { token, role, userId }
 }
 
 // ================================
@@ -52,22 +52,22 @@ export async function fetchMaterials() {
   return response.json();
 }
 
-export async function createMaterial(name, quantity, available) {
+export async function createMaterial(name, quantity) {
   const response = await fetch(`${API_URL}/materials`, {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ name, quantity, available }),
+    body: JSON.stringify({ name, quantity }),
   });
 
   if (!response.ok) throw new Error("Erreur création matériel");
   return response.json();
 }
 
-export async function updateMaterial(id, name, quantity, available) {
+export async function updateMaterial(id, name, quantity) {
   const response = await fetch(`${API_URL}/materials/${id}`, {
     method: "PUT",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ name, quantity, available }),
+    body: JSON.stringify({ name, quantity }),
   });
 
   if (!response.ok) throw new Error("Erreur mise à jour matériel");
@@ -108,6 +108,23 @@ export async function createReservation(materialId, startDate, endDate) {
     const err = await response.json();
     console.error("BACKEND ERROR :", err);
     throw new Error("Erreur lors de la création de la réservation");
+  }
+
+  return response.json();
+}
+
+// ✅ AJOUT IMPORTANT (MANQUANT AVANT)
+export async function updateReservation(id, startDate, endDate) {
+  const response = await fetch(`${API_URL}/reservations/${id}`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ startDate, endDate }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    console.error("BACKEND ERROR :", err);
+    throw new Error("Erreur modification réservation");
   }
 
   return response.json();

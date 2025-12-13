@@ -94,40 +94,49 @@ export default function Materials() {
 
   // --- COLONNES ---
   const columns = [
-    { header: "ID", accessor: "id" },
-    { header: "Nom", accessor: "name" },
-    { header: "Quantité", accessor: "quantity" },
-    {
-      header: "Disponible",
-      accessor: "available",
-      cell: (value, row) => (
+  { header: "ID", accessor: "id" },
+  { header: "Nom", accessor: "name" },
+  { header: "Quantité", accessor: "quantity" },
+  {
+    header: "Disponible",
+    accessor: "available",
+    cell: (value, row) => {
+      const canReserve = row.quantity > 0;
+
+      return (
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-          {value ? (
-            <span style={{ color: "#2ecc71", fontWeight: "bold" }}>Oui</span>
+          {canReserve ? (
+            <span style={{ color: "#2ecc71", fontWeight: "bold" }}>
+              Oui ({row.quantity})
+            </span>
           ) : (
-            <span style={{ color: "#e74c3c", fontWeight: "bold" }}>Non</span>
+            <span style={{ color: "#e74c3c", fontWeight: "bold" }}>
+              Non
+            </span>
           )}
 
           <button
             onClick={() => handleReserve(row.id)}
-            disabled={!value}
+            disabled={!canReserve}
             style={{
-              backgroundColor: value ? "#2ecc71" : "#444",
-              color: value ? "white" : "#888",
+              backgroundColor: canReserve ? "#2ecc71" : "#444",
+              color: canReserve ? "white" : "#888",
               border: "none",
               borderRadius: "5px",
               padding: "6px 12px",
-              cursor: value ? "pointer" : "not-allowed",
+              cursor: canReserve ? "pointer" : "not-allowed",
               fontWeight: "bold",
               fontSize: "0.85rem",
             }}
           >
-            {value ? "Réserver" : "Indisp."}
+            {canReserve ? "Réserver" : "Indisp."}
           </button>
         </div>
-      ),
+      );
     },
-  ];
+  },
+];
+
 
   // --- RENDU ---
   return (
@@ -145,32 +154,35 @@ export default function Materials() {
       />
 
       <Table
-        columns={columns}
-        data={filteredMaterials}
-        renderActions={(row) =>
-          role === "admin" ? (
-            <div style={{ display: "flex", gap: "10px" }}>
-              <button
-                onClick={() => {
-                  setEditId(row.id);
-                  setName(row.name);
-                  setQuantity(row.quantity);
-                }}
-                style={actionButtonStyle("#3498db")}
-              >
-                ✏️
-              </button>
+  columns={columns}
+  data={filteredMaterials}
+  {...(role === "admin" && {
+    renderActions: (row) => (
+      <div style={{ display: "flex", gap: "10px" }}>
+        <button
+          onClick={() => {
+            setEditId(row.id);
+            setName(row.name);
+            setQuantity(row.quantity);
+          }}
+          style={actionButtonStyle("#3498db")}
+          title="Modifier"
+        >
+          ✏️
+        </button>
 
-              <button
-                onClick={() => handleDelete(row.id)}
-                style={actionButtonStyle("#e74c3c")}
-              >
-                🗑️
-              </button>
-            </div>
-          ) : null
-        }
-      />
+        <button
+          onClick={() => handleDelete(row.id)}
+          style={actionButtonStyle("#e74c3c")}
+          title="Supprimer"
+        >
+          🗑️
+        </button>
+      </div>
+    ),
+  })}
+/>
+
 
       {role === "admin" && (
         <div style={formContainerStyle}>
